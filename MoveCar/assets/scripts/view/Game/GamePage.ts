@@ -92,29 +92,13 @@ export class GamePage extends Component {
      * @param value win-true lose-false
      * @param goldCount 获胜时的奖励
      */
-    onSettle(value: boolean, goldCount?: number) {
+    onSettle(value: boolean, goldCount: number) {
         if (!this.inGame) {
             return;
         }
         console.log("gamePage onSettle:", value);
         this.inGame = false;
-        TipsManager.getInstance().showLoading("结算中...");
-        GameData.getUserLevel((level) => {
-            if (value) {
-                TipsManager.getInstance().hideLoading();
-                this.settleView.getComponent(SettleView).init(level, value, 0)
-                this.settleView.active = true;
-                UserData.getInstance().level++;
-            } else {
-                TipsManager.getInstance().hideLoading();
-                this.settleView.getComponent(SettleView).init(level, value)
-                this.settleView.active = true;
-            }
-        }, (e) => {
-            console.error(e);
-            TipsManager.getInstance().hideLoading();
-            this.settleView.active = true;
-        })
+        this.settleView.getComponent(SettleView).init(value, goldCount)
     }
 
     /**

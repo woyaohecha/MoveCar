@@ -6,71 +6,12 @@ const { ccclass, property } = _decorator;
 @ccclass('GameData')
 export class GameData {
 
-
-    private static _levelList: any[] = [];
-
+    private static _gameConfig: any = null;
     /**
-     * 获取关卡数据
-     * @param success 返回关卡数据
+     * 获取游戏配置
+     * @param success 
      * @param fail 
      */
-    public static getLevelData(level: number, success: Function, fail: Function) {
-        let levelData;
-        if (this._levelList.length == 0) {
-            HttpManager.getLevelList((res) => {
-                this._levelList = JSON.parse(res).data.list;
-                this.getLevelData(level, success, fail);
-            }, (e) => {
-                console.log(e);
-                fail();
-            })
-        } else {
-            if (level >= this._levelList.length) {
-                levelData = this._levelList[level % this._levelList.length]
-            } else {
-                levelData = this._levelList[level];
-            }
-            success(levelData);
-        }
-
-    }
-
-
-    private static _taskData: any[] = [];
-    public static passLevel(success: Function, fail: Function) {
-        if (UserData.getInstance().level + 14 > 19) {
-            fail();
-            return;
-        }
-        if (this._taskData.length == 0) {
-            HttpManager.getTaskList(1, (res) => {
-                let data = JSON.parse(res).data.list;
-                console.log(data);
-                if (data.length > 0) {
-                    for (let i = 0; i < data.length; i++) {
-                        if (data[i].name[4] == "0") {
-                            this._taskData[Number(data[i].name[5]) - 1] = data[i];
-                        }
-                    }
-                    this.passLevel(success, fail);
-                }
-            }, (e) => {
-                console.error(e);
-            })
-        } else {
-            console.log(this._taskData[UserData.getInstance().level].id);
-            HttpManager.completeTask(this._taskData[UserData.getInstance().level].id, (res) => {
-                success();
-            }, (e) => {
-                fail();
-                console.error("领取失败", e);
-            })
-        }
-
-
-    }
-
-    private static _gameConfig: any = null;
     public static getGameConfig(success: Function, fail: Function) {
         if (!this._gameConfig) {
             HttpManager.getGameConfig((res) => {
@@ -86,12 +27,48 @@ export class GameData {
         }
     }
 
+
+    /**
+     * 获取用户关卡进度
+     * @param success 
+     * @param fail 
+     */
     public static getUserLevel(success: Function, fail: Function) {
-        console.log("level", UserData.getInstance().level);
-        success(UserData.getInstance().level);
+        HttpManager.getUserInfo((res) => {
+            let level = Number(JSON.parse(res).data.barrier);
+            success(level);
+        }, () => { })
     }
 
-    public static getLevelMapData(level?: number) {
+    private static _levelRewardConfig: any[] = [];
+    /**
+     * 获取关卡奖励
+     * @param level 
+     * @param success 
+     */
+    public static getLevelReward(level: number, success: Function) {
+        if (this._levelRewardConfig.length == 0) {
+            HttpManager.getLevelList((res) => {
+                this._levelRewardConfig = JSON.parse(res).data.list;
+                this.getLevelReward(level, success);
+            }, () => { })
+        } else {
+            if (level > this._levelRewardConfig.length) {
+                success(0);
+            } else {
+                success(this._levelRewardConfig[level - 1]);
+            }
+        }
+
+    }
+
+
+    /**
+     * 获取关卡map数据
+     * @param level 
+     * @returns 
+     */
+    public static getLevelMapData(level: number) {
         let row = level * 3 + 4 > 17 ? 17 : level * 3 + 4;
         let col = level * 2 + 4 > 10 ? 10 : level * 2 + 4;
         let data = [];
@@ -125,19 +102,6 @@ export class GameData {
             }
 
         }
-        // this.visited = [];
-        // for (let i = 0; i < 17; i++) {
-        //     for (let j = 0; j < 9; j++) {
-        //         console.log("start:", [i, j], this.visited.length);
-        //         let dataa = this.checkData2(data, i, j)
-        //         console.log([i, j], "end:", this.checkData2(data, i, j), data.length);
-        //         if (dataa) {
-        //             this._quesitionLocation.push(dataa);
-        //         }
-        //     }
-        // }
-        // console.log(this._quesitionLocation)
-        console.log(data);
         console.log(JSON.stringify(data));
         return data;
     }

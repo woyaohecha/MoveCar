@@ -63,47 +63,9 @@ export class UserData {
         return this._passCount;
     }
 
-    /**
-     * 关卡进度
-     */
-    private _level: number = 0;
-    set level(value: number) {
-        this._level = value;
-        sys.localStorage.setItem("level", JSON.stringify(this._level));
-    }
-    get level() {
-        return this._level;
-    }
-
-    /**
-     * 金币
-     */
-    private _gold: number = 0;
-    set gold(value: number) {
-        this._gold = value;
-        sys.localStorage.setItem("gold", JSON.stringify(this._gold));
-    }
-    get gold() {
-        return this._gold;
-    }
-
-    /**
-     * 门票
-     */
-    private _ticket: number = 0;
-    set ticket(value: number) {
-        this._ticket = value;
-        sys.localStorage.setItem("ticket", JSON.stringify(this._ticket));
-    }
-    get ticket() {
-        return this._ticket;
-    }
 
     private constructor() {
         this.startOnlineTimer();
-        this._level = sys.localStorage.getItem("level") ? Number(sys.localStorage.getItem("level")) : 0;
-        this._gold = sys.localStorage.getItem("gold") ? Number(sys.localStorage.getItem("gold")) : 0;
-        this._ticket = sys.localStorage.getItem("ticket") ? Number(sys.localStorage.getItem("ticket")) : 0;
         this.accessToken = sys.localStorage.getItem("accessToken") ? JSON.parse(sys.localStorage.getItem("accessToken")) : null;
         this.refreshToken = sys.localStorage.getItem("refreshToken") ? JSON.parse(sys.localStorage.getItem("refreshToken")) : null;
 

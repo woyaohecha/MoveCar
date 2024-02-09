@@ -141,6 +141,16 @@ export class HttpManager {
     }
 
 
+    public static getMapData(level: number, success: Function, fail: Function) {
+        let url = HttpConfig.httpUrl + ApiUrl.GET_MAPDATA;
+        let params = {
+            game_id: AppConfig.game_id,
+            level: level
+        }
+        this.httpRequest("POST", url, params, true, success, fail);
+    }
+
+
     /**
      * 通关时调用
      * @param level 当前关卡id
@@ -151,7 +161,7 @@ export class HttpManager {
         let url = HttpConfig.httpUrl + ApiUrl.LEVEL_PASS;
         let params = {
             game_id: AppConfig.game_id,
-            barrier_id: level
+            level: level
         }
         this.httpRequest("POST", url, params, true, success, fail);
     }

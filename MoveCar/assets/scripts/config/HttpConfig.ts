@@ -39,9 +39,13 @@ export const enum ApiUrl {
      */
     POST_CASHOUT = "withdrawal",
     /**
+     * 获取地图数据
+     */
+    GET_MAPDATA = "get_map",
+    /**
      * 通关成功
      */
-    LEVEL_PASS = "clearance",
+    LEVEL_PASS = "pass_level",
     /**
      * 双倍领取
      */

@@ -16,27 +16,13 @@ export class SettleView extends Component {
     @property(Node)
     doubleBtn: Node = null;
 
-    @property(Label)
-    levelLabel: Label = null;
 
-    private _level: number = 0;
-    get level() {
-        return this._level;
-    }
-    set level(value: number) {
-        this._level = value;
-        this.levelLabel.string = `value`;
-    }
-
-    init(level: number, value: boolean, goldCount?: number) {
-        if (value) {
-            UserData.getInstance().gold += goldCount;
-        }
-        this._level = level + 1;
+    init(value: boolean, goldCount: number) {
         this.node.getChildByName("Win").active = value;
         this.node.getChildByName("Lose").active = !value;
         this.goldCountLabel.string = `x${goldCount ? goldCount : 0}`;
         this.doubleBtn.active = true;
+        this.node.active = true;
     }
 
     onBtnDouble() {

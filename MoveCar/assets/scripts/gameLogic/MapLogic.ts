@@ -2,6 +2,7 @@ import { _decorator, Component, Node, Color, Sprite, Prefab, resources, instanti
 import { GameData } from '../data/GameData';
 import { UserData } from '../data/UserData';
 import { EventManager } from '../manager/EventManager';
+import { HttpManager } from '../manager/HttpManager';
 import { UIManager } from '../manager/UIManager';
 import { CarDir } from './CarLogic';
 import { CarPool } from './CarPool';
@@ -15,6 +16,7 @@ export class MapLogic extends Component {
     private _settle: boolean = false;
     private _start: boolean = false;
     private _levelData: any = null;
+    private _level: number = 0
 
     onLoad() {
         EventManager.getInstance().on("initGame", this.initMap, this);
@@ -26,19 +28,29 @@ export class MapLogic extends Component {
         this._settle = false;
         this._start = false;
         let levelData: any = null;
-        GameData.getGameConfig((gameConfig) => {
-            if (race == "1") {
-                levelData = gameConfig.level_6.value;
-                console.log("level_6-levelData:", levelData)
-                this.initLevelMap(JSON.parse(levelData));
-            } else {
-                levelData = gameConfig[`level_${UserData.getInstance().level + 1}`].value;
-                this.initLevelMap(JSON.parse(levelData));
-            }
-        }, () => {
-            levelData = GameData.getLevelMapData(4);
-            this.initLevelMap(levelData);
-        })
+        if (race == "1") {
+            HttpManager.getMapData(-1, (res) => {
+                levelData = JSON.parse(res).data.map;
+                this.initLevelMap(levelData);
+            }, () => { })
+        } else {
+            GameData.getUserLevel((level) => {
+                this._level = level + 1;
+                console.log("_level", this._level)
+                HttpManager.getMapData(level + 1, (res) => {
+                    levelData = JSON.parse(res).data.map;
+                    this.initLevelMap(levelData);
+                }, () => {
+                    levelData = this.errMapData(level);
+                    this.initLevelMap(levelData);
+                })
+            }, () => { })
+        }
+    }
+
+
+    errMapData(level: number) {
+        return GameData.getLevelMapData(level);
     }
 
 
@@ -48,15 +60,15 @@ export class MapLogic extends Component {
         }
         if (this.node.children.length == 0 && !this._settle && this._start) {
             this._settle = true;
-            let passGold = 0;
-            GameData.getLevelData(UserData.getInstance().level, (leveData) => {
+            HttpManager.passLevel(this._level, (res) => {
                 console.log("settle");
-                passGold = leveData.pass_goldcoin;
+                let passGold = JSON.parse(res).data.reward;
                 EventManager.getInstance().emit("gameSettle", true, passGold);
             }, () => {
-
+                console.log("settle");
+                let passGold = 0;
+                EventManager.getInstance().emit("gameSettle", true, passGold);
             })
-
         }
     }
 
@@ -121,9 +133,7 @@ export class MapLogic extends Component {
                     continue;
                 }
             }
-            if (i = this._levelData.length && j == this._levelData[i].length && this.allCantMove) {
-                console.log("lose---");
-            }
+
 
         }
         console.log("out for", this.allCantMove);
